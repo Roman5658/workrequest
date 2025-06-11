@@ -137,7 +137,7 @@
             items: Array.from(document.querySelectorAll('input[name="items"]:checked')).map(el => el.value)
         };
 
-        fetch("https://twój-backend.vercel.app/api/send", {
+        fetch("https://workrequest-server.vercel.app/api/send", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
