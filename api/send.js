@@ -1,11 +1,11 @@
 const axios = require('axios');
 
 const TOKEN = process.env.TELEGRAM_TOKEN;
-const CHAT_IDS = ['1455108039', '5537800074']; // Твой + второй
+const CHAT_IDS = ['1455108039', '5537800074']; // id чатов
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).end("Method Not Allowed");
+        return res.status(405).send("Method Not Allowed");
     }
 
     const { name, surname, phone, date, time, comment, items } = req.body;
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 📅 Data: ${date}
 ⏰ Godzina: ${time}
 💬 Komentarz: ${comment}
-`;
+  `;
 
     try {
         for (const id of CHAT_IDS) {
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         }
         res.status(200).json({ ok: true });
     } catch (error) {
-        console.error(error);
+        console.error('Telegram error:', error);
         res.status(500).json({ ok: false, error: "Send error" });
     }
 }
