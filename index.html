@@ -81,10 +81,10 @@
     <h2>Formularz zamówienia</h2>
     <form id="tgForm">
         <label>Imię:</label>
-        <input type="text" name="name">
+        <input type="text" name="name" required>
 
         <label>Nazwisko:</label>
-        <input type="text" name="surname">
+        <input type="text" name="surname" required>
 
         <label>Artykuły (można wybrać kilka):</label>
         <div>
@@ -97,13 +97,13 @@
         </div>
 
         <label>Numer telefonu:</label>
-        <input type="tel" name="phone">
+        <input type="tel" name="phone" required>
 
         <label>Data przyjazdu do magazynu:</label>
-        <input type="date" name="date">
+        <input type="date" name="date" required>
 
         <label>Godzina przyjazdu do magazynu:</label>
-        <input type="time" name="time">
+        <input type="time" name="time" required>
 
         <label>Komentarz:</label>
         <textarea name="comment" rows="4"></textarea>
@@ -113,6 +113,9 @@
 </div>
 
 <script>
+    const token = '7502146774:AAFgQyQ2_HayWAQcQzW4XNGeBtlGdLrRYNI';
+    const chat_ids = ['1455108039', '5537800074'];
+
     const form = document.getElementById('tgForm');
     const toast = document.getElementById('toast');
 
@@ -127,33 +130,45 @@
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const data = {
-            name: form.name.value,
-            surname: form.surname.value,
-            phone: form.phone.value,
-            date: form.date.value,
-            time: form.time.value,
-            comment: form.comment.value,
-            items: Array.from(document.querySelectorAll('input[name="items"]:checked'))
-                .map(el => el.value)
-        };
+        const name = form.name.value;
+        const surname = form.surname.value;
+        const phone = form.phone.value;
+        const date = form.date.value;
+        const time = form.time.value;
+        const comment = form.comment.value;
 
-        fetch("https://workrequest.vercel.app/api/send", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(() => {
-                showToast("✅ Formularz został wysłany!");
-                form.reset();
-            })
-            .catch(err => {
-                console.error(err);
-                showToast("❌ Błąd wysyłania!");
-            });
+        const selectedItems = Array.from(document.querySelectorAll('input[name="items"]:checked'))
+            .map(el => el.value)
+            .join(', ');
+
+        const message = `
+📦 Nowe zgłoszenie:
+👤 Imię: ${name}
+👤 Nazwisko: ${surname}
+🧤 Artykuły: ${selectedItems}
+📞 Telefon: ${phone}
+📅 Data: ${date}
+⏰ Godzina: ${time}
+💬 Komentarz: ${comment}
+`;
+
+        let success = true;
+
+        chat_ids.forEach(id => {
+            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: id,
+                    text: message
+                })
+            }).then(res => {
+                if (!res.ok) success = false;
+            }).catch(() => success = false);
+        });
+
+        showToast("✅ Formularz został wysłany!");
+        form.reset();
     });
 </script>
 
